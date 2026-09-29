@@ -1,0 +1,161 @@
+@import "tailwindcss";
+@source "../";
+
+/* Design tokens */
+:root {
+  --paper: #F6F4EF;
+  --surface: #FFFFFF;
+  --ink: #16201C;
+  --muted: #55605A;
+  --border: #D9D5CB;
+  --primary: #1F4D3A;
+  --primary-hover: #173B2C;
+  --focus: #B4530A;
+
+  /* AQI band colours */
+  --aqi-good: #4A7C59;
+  --aqi-satisfactory: #6B9E3A;
+  --aqi-moderate: #C68A1A;
+  --aqi-poor: #C05A1F;
+  --aqi-very-poor: #992B1A;
+  --aqi-severe: #5C1018;
+
+  /* AQI band backgrounds (lighter) */
+  --aqi-good-bg: #EDF5F0;
+  --aqi-satisfactory-bg: #F0F5E8;
+  --aqi-moderate-bg: #FDF5E2;
+  --aqi-poor-bg: #FBF0E8;
+  --aqi-very-poor-bg: #F8EAE8;
+  --aqi-severe-bg: #F2E8EA;
+}
+
+@theme {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-focus: var(--focus);
+  --font-sans: var(--font-ibm-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), "Courier New", monospace;
+}
+
+/* Reset and base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ibm-plex-sans), system-ui, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Typography scale */
+.text-14 { font-size: 14px; line-height: 1.5; }
+.text-16 { font-size: 16px; line-height: 1.5; }
+.text-20 { font-size: 20px; line-height: 1.4; }
+.text-28 { font-size: 28px; line-height: 1.3; }
+.text-40 { font-size: 40px; line-height: 1.2; }
+
+/* Mono for data */
+.font-mono {
+  font-family: var(--font-ibm-plex-mono), "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scrollable tables */
+.table-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Leaflet overrides */
+.leaflet-container {
+  font-family: var(--font-ibm-plex-sans), system-ui, sans-serif;
+  background: var(--paper);
+}
+
+.leaflet-control-attribution {
+  font-size: 11px;
+  background: rgba(246, 244, 239, 0.9) !important;
+  color: var(--muted) !important;
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--primary);
+  color: white;
+  padding: 8px 16px;
+  z-index: 9999;
+  font-size: 14px;
+  transition: top 0.12s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Hover transitions (120ms, no motion on reduced) */
+.transition-colors {
+  transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transition-colors {
+    transition: none;
+  }
+}
+
+/* Compact 1px borders */
+.border-1 {
+  border-width: 1px;
+  border-style: solid;
+}
+
+/* AQI badge colours */
+.aqi-good { color: var(--aqi-good); background: var(--aqi-good-bg); }
+.aqi-satisfactory { color: var(--aqi-satisfactory); background: var(--aqi-satisfactory-bg); }
+.aqi-moderate { color: var(--aqi-moderate); background: var(--aqi-moderate-bg); }
+.aqi-poor { color: var(--aqi-poor); background: var(--aqi-poor-bg); }
+.aqi-very-poor { color: var(--aqi-very-poor); background: var(--aqi-very-poor-bg); }
+.aqi-severe { color: var(--aqi-severe); background: var(--aqi-severe-bg); }
+
+/* Print */
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; color: black; }
+}
