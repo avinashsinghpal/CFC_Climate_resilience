@@ -19,6 +19,9 @@ import type {
   Ticket,
   AlertRule,
   PollutionType,
+  User,
+  UserRole,
+  AuthResponse,
 } from "@/types";
 
 import {
@@ -40,6 +43,31 @@ const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === "true";
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
+// --- Token & Cookie Management for Next.js and API Client ---
+
+export function getStoredToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("fcap_token");
+}
+
+export function setAuthSession(token: string, role: string) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("fcap_token", token);
+  localStorage.setItem("fcap_role", role);
+  // Also set cookie so Next.js middleware can inspect session at edge
+  const maxAge = 86400 * 7; // 7 days
+  document.cookie = `fcap_token=${token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  document.cookie = `fcap_role=${role}; path=/; max-age=${maxAge}; SameSite=Lax`;
+}
+
+export function clearAuthSession() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("fcap_token");
+  localStorage.removeItem("fcap_role");
+  document.cookie = "fcap_token=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "fcap_role=; path=/; max-age=0; SameSite=Lax";
+}
+
 interface ApiResult<T> {
   data: T;
   isMock: boolean;
@@ -54,25 +82,127 @@ async function apiFetch<T>(
     return { data: null as unknown as T, isMock: true };
   }
   try {
+    const token = getStoredToken();
+    const authHeaders: Record<string, string> = {};
+    if (token) {
+      authHeaders["Authorization"] = `Bearer ${token}`;
+    }
+
     const res = await fetch(`${API_BASE}${path}`, {
       ...options,
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
+        ...authHeaders,
         ...(options?.headers ?? {}),
       },
     });
+
     if (res.status === 501) {
       return { data: null as unknown as T, isMock: true };
     }
     if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
+      const errorData = await res.json().catch(() => null);
+      throw new Error(errorData?.detail || `HTTP ${res.status}`);
     }
     const data = await res.json();
     return { data, isMock: false };
-  } catch {
-    return { data: null as unknown as T, isMock: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Request failed";
+    return { data: null as unknown as T, isMock: true, error: message };
   }
 }
+
+// --- Authentication Endpoints ---
+
+export async function registerUser(userData: {
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+}): Promise<AuthResponse> {
+  const res = await fetch(`${API_BASE}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(userData),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data?.detail || "Registration failed");
+  }
+
+  setAuthSession(data.access_token, data.user.role);
+  return data;
+}
+
+export async function loginUser(credentials: {
+  email: string;
+  password: string;
+}): Promise<AuthResponse> {
+  const res = await fetch(`${API_BASE}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(credentials),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data?.detail || "Login failed");
+  }
+
+  setAuthSession(data.access_token, data.user.role);
+  return data;
+}
+
+export async function getCurrentUser(): Promise<User | null> {
+  const token = getStoredToken();
+  if (!token && typeof window !== "undefined") {
+    // Check if token exists in cookie
+    const match = document.cookie.match(/fcap_token=([^;]+)/);
+    if (!match) return null;
+  }
+
+  const tokenToUse = token || (typeof window !== "undefined" ? document.cookie.match(/fcap_token=([^;]+)/)?.[1] : null);
+  if (!tokenToUse) return null;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/me`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${tokenToUse}`,
+      },
+    });
+
+    if (!res.ok) {
+      clearAuthSession();
+      return null;
+    }
+
+    const user: User = await res.json();
+    return user;
+  } catch {
+    return null;
+  }
+}
+
+export async function logoutUser(): Promise<void> {
+  try {
+    await fetch(`${API_BASE}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch {
+    // Ignore network error on logout
+  } finally {
+    clearAuthSession();
+  }
+}
+
 
 // --- Sensors ---
 

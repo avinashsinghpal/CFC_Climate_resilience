@@ -161,3 +161,21 @@ export interface AlertRule {
   duration: string;
   action: string;
 }
+
+// User & Authentication types
+export type UserRole = "PUBLIC" | "OFFICIAL";
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  createdAt?: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  user: User;
+}
+

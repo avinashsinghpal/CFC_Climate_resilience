@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from app.database import get_database
+from app.utils.security import require_official_user
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_official_user)])
 
 class VerifyRequest(BaseModel):
     hash: str
