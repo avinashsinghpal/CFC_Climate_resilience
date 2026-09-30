@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.database import get_database
+from app.utils.security import require_official_user
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_official_user)])
 
 @router.get("")
 async def get_alerts(db=Depends(get_database)):

@@ -15,32 +15,24 @@ const features = [
     title: "Smart sensors and citizen reporting",
     description:
       "Low-cost Sensirion SPS30 particulate sensors deployed over LoRaWAN and NB-IoT networks provide continuous PM2.5 and PM10 readings. Citizens can submit geo-tagged pollution sightings through a web form.",
-    href: "/sensors",
-    linkLabel: "View sensors",
   },
   {
     icon: BarChart3,
     title: "72 to 96 hour air quality forecast",
     description:
       "A three-model ensemble (Swin Transformer v2, ST-GCN, AirDDE) combines sensor data, traffic patterns, and Sentinel-5P satellite imagery to produce a forecast with a confidence range.",
-    href: "/forecast",
-    linkLabel: "View forecast",
   },
   {
     icon: ShieldCheck,
     title: "Data integrity and federated learning",
     description:
       "Every sensor reading is hashed, verified with zk-SNARK proofs, and anchored on Polygon zkEVM. Model training is federated: raw readings stay at the edge and only model weights are shared.",
-    href: "/integrity",
-    linkLabel: "View integrity ledger",
   },
   {
     icon: Ticket,
     title: "Automatic service tickets",
     description:
       "When thresholds are breached, the platform raises Open311-compatible service tickets and routes them to the appropriate Integrated Command and Control Centre (ICCC) without manual intervention.",
-    href: "/alerts",
-    linkLabel: "View alerts and tickets",
   },
 ];
 
@@ -90,16 +82,16 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
-                href="/forecast"
+                href="/register"
                 className="inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold rounded-sm bg-white text-[#0F291E] hover:bg-emerald-50 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_25px_rgba(255,255,255,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F291E]"
               >
-                View forecast
+                Sign Up
               </Link>
               <Link
-                href="/report"
+                href="/login"
                 className="inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold rounded-sm bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all duration-300 backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F291E]"
               >
-                Report pollution
+                Sign In
               </Link>
             </div>
           </div>
@@ -142,15 +134,9 @@ export default function HomePage() {
                     <h3 className="text-2xl font-bold text-ink mb-4">
                       {feature.title}
                     </h3>
-                    <p className="text-base text-muted leading-relaxed mb-8 flex-grow">
+                    <p className="text-base text-muted leading-relaxed">
                       {feature.description}
                     </p>
-                    <Link
-                      href={feature.href}
-                      className="inline-flex items-center text-sm font-semibold text-primary hover:text-focus transition-colors duration-200 mt-auto"
-                    >
-                      {feature.linkLabel} <span className="ml-2 group-hover:translate-x-1 transition-transform duration-200">&rarr;</span>
-                    </Link>
                   </div>
                 </div>
               );

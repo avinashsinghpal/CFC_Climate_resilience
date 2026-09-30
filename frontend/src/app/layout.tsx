@@ -3,6 +3,7 @@ import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { AuthProvider } from "@/context/AuthContext";
 
 const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-ibm-plex-sans",
@@ -44,18 +45,20 @@ export default function RootLayout({
       className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
     >
       <body className="min-h-screen flex flex-col bg-paper text-ink font-sans antialiased">
-        {/* Skip link for keyboard users */}
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
+        <AuthProvider>
+          {/* Skip link for keyboard users */}
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
 
-        <Header />
+          <Header />
 
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
 
-        <Footer />
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

@@ -2,8 +2,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
+import os
 from app.database import connect_to_mongo, close_mongo_connection
-from app.routers import sensors, reports, forecast, integrity, alerts
+from app.routers import sensors, reports, forecast, integrity, alerts, auth
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -20,16 +21,21 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS configuration
+# CORS configuration supporting credentials (cookies & authorization headers)
+allowed_origins_env = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
+origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # For development, allow all
+    allow_origins=origins,
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Include routers
+app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(sensors.router, prefix="/api/sensors", tags=["Sensors"])
 app.include_router(reports.router, prefix="/api/reports", tags=["Reports"])
 app.include_router(forecast.router, prefix="/api/forecast", tags=["Forecast"])

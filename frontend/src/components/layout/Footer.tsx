@@ -28,11 +28,9 @@ export function Footer() {
               <ul className="space-y-2">
                 {[
                   { href: "/", label: "Home" },
-                  { href: "/forecast", label: "Forecast" },
-                  { href: "/sensors", label: "Sensors" },
-                  { href: "/report", label: "Report pollution" },
-                  { href: "/alerts", label: "Alerts and tickets" },
-                  { href: "/integrity", label: "Data integrity" },
+                  { href: "/login", label: "Sign In" },
+                  { href: "/register", label: "Register" },
+                  { href: "/terms", label: "Terms & Methodology" },
                 ].map((link) => (
                   <li key={link.href}>
                     <Link
