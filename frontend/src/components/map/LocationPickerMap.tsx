@@ -36,6 +36,7 @@ export default function LocationPickerMap({
   const circleRef = useRef<L.Circle | null>(null);
   const [localLat, setLocalLat] = useState(lat);
   const [localLng, setLocalLng] = useState(lng);
+  const lastSetRef = useRef({ lat, lng });
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -62,6 +63,7 @@ export default function LocationPickerMap({
 
     marker.on("dragend", () => {
       const pos = marker.getLatLng();
+      lastSetRef.current = { lat: pos.lat, lng: pos.lng };
       setLocalLat(pos.lat);
       setLocalLng(pos.lng);
       onLocationChange(pos.lat, pos.lng);
@@ -71,6 +73,7 @@ export default function LocationPickerMap({
     });
 
     map.on("click", (e: L.LeafletMouseEvent) => {
+      lastSetRef.current = { lat: e.latlng.lat, lng: e.latlng.lng };
       marker.setLatLng(e.latlng);
       setLocalLat(e.latlng.lat);
       setLocalLng(e.latlng.lng);
@@ -90,6 +93,25 @@ export default function LocationPickerMap({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // React to lat/lng prop changes (e.g. "Use my location" sets new coords in
+  // the parent). Moves pin, blur circle and map view; no-op when identical
+  // to the last value we rendered ourselves.
+  useEffect(() => {
+    if (lat === lastSetRef.current.lat && lng === lastSetRef.current.lng) return;
+    lastSetRef.current = { lat, lng };
+    const map = mapRef.current;
+    const marker = markerRef.current;
+    if (!map || !marker) return;
+    marker.setLatLng([lat, lng]);
+    setLocalLat(lat);
+    setLocalLng(lng);
+    if (circleRef.current) {
+      circleRef.current.setLatLng([lat, lng]);
+    }
+    map.setView([lat, lng], map.getZoom());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lat, lng]);
 
   // Toggle blur radius circle
   useEffect(() => {
