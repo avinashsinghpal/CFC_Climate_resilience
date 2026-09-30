@@ -70,6 +70,7 @@ export default function ReportClient() {
   const [notEnabled, setNotEnabled] = useState(false);
   const [recentReports, setRecentReports] = useState<CitizenReport[]>([]);
   const [recentLoading, setRecentLoading] = useState(true);
+  const [recentIsMock, setRecentIsMock] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -77,6 +78,7 @@ export default function ReportClient() {
     async function loadRecent() {
       const result = await getRecentReports();
       setRecentReports(result.data);
+      setRecentIsMock(result.isMock);
       setRecentLoading(false);
     }
     loadRecent();
@@ -432,9 +434,11 @@ export default function ReportClient() {
 
         {/* Sidebar: recent reports */}
         <aside aria-labelledby="recent-reports-heading">
-          <MockDataBanner>
-            Sample data. These are not real reports.
-          </MockDataBanner>
+          {!recentLoading && recentIsMock && (
+            <MockDataBanner>
+              Sample data. These are not real reports.
+            </MockDataBanner>
+          )}
           <h2
             id="recent-reports-heading"
             className="text-16 font-semibold text-ink mt-4 mb-3"
@@ -446,6 +450,15 @@ export default function ReportClient() {
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-20 bg-paper border border-border rounded-sm" />
               ))}
+            </div>
+          ) : recentReports.length === 0 ? (
+            <div className="border border-dashed border-border bg-paper rounded-sm p-6 text-center">
+              <p className="text-14 font-medium text-ink mb-1">
+                No reports near you yet
+              </p>
+              <p className="text-14 text-muted">
+                Be the first — submit a report and it will appear here.
+              </p>
             </div>
           ) : (
             <ul className="space-y-3">
